@@ -1,9 +1,4 @@
-
-import model.Mahasiswa;
-import model.Dosen;
-import model.MataKuliah;
-import model.Enrollment;
-import model.Person;
+import model.*;
 
 public class TestModel {
     public static void main(String[] args) {

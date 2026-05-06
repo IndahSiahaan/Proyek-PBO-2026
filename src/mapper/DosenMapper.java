@@ -1,4 +1,4 @@
-package Mapper;
+package mapper;
 
 import db.DatabaseConnection;
 import model.Dosen;
