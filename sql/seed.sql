@@ -9,11 +9,11 @@ INSERT INTO lecturers (id, name, email, department) VALUES
 GO
 
 INSERT INTO students (id, name, email, major) VALUES
-('M001', 'Laura Awise',  'laura@mahasiswa.ac.id', 'Teknik Informatika'),
+('M001', 'Laura Awise', 'laura@mahasiswa.ac.id', 'Teknik Informatika'),
 ('M002', 'Indah Siahaan', 'indah@mahasiswa.ac.id',  'Teknik Informatika'),
-('M003', 'Dea Anggreany',     'dea@mahasiswa.ac.id', 'Sistem Informasi'),
-('M004', 'Kelvin Marpaung',     'kelvin@mahasiswa.ac.id',  'Sistem Informasi'),
-('M005', 'Jay Park',  'jay@mahasiswa.ac.id',   'Teknik Informatika');
+('M003', 'Dea Anggreany', 'dea@mahasiswa.ac.id', 'Sistem Informasi'),
+('M004', 'Kelvin Marpaung', 'kelvin@mahasiswa.ac.id',  'Sistem Informasi'),
+('M005', 'Jay Park', 'jay@mahasiswa.ac.id',   'Teknik Informatika');
 GO
 
 INSERT INTO courses (code, name, credits, lecturer_id) VALUES

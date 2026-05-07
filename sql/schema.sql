@@ -46,5 +46,4 @@ CREATE TABLE enrollments (
     CONSTRAINT FK_enroll_crs  FOREIGN KEY (course_code) REFERENCES courses(code)
 );
 GO
-
 PRINT 'Schema berhasil dibuat.';

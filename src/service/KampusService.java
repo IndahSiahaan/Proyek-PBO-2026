@@ -9,279 +9,138 @@ import model.Dosen;
 import model.MataKuliah;
 import model.Enrollment;
 
-import java.util.ArrayList;
-import java.util.HashMap;
-import java.util.List;
+import java.util.*;
 
 /**
  * KampusService - Service Layer
- * Anggota 4
- *
- * Logika bisnis utama program akademik.
- * Memakai ArrayList dan HashMap sebagai struktur data (JCF).
- * Semua operasi CRUD diteruskan ke masing-masing Mapper.
+ * Dea Hutapea (12S24053): Business logic menggunakan Java Collection Framework (JCF)
+ * Menggunakan: ArrayList, HashMap, TreeSet, LinkedHashMap
  */
 public class KampusService {
 
-    // ----------------------------------------------------------------
-    // Mapper (akses ke database via Data Mapper Pattern)
-    // ----------------------------------------------------------------
-    private MahasiswaMapper  mahasiswaMapper;
-    private DosenMapper      dosenMapper;
+    private MahasiswaMapper mahasiswaMapper;
+    private DosenMapper dosenMapper;
     private MataKuliahMapper mataKuliahMapper;
     private EnrollmentMapper enrollmentMapper;
 
-    // ----------------------------------------------------------------
-    // Cache lokal pakai JCF (ArrayList + HashMap)
-    // ----------------------------------------------------------------
-    private ArrayList<Mahasiswa>          cacheAllMahasiswa;
-    private HashMap<String, Mahasiswa>    indexMahasiswa;   // key: id
-    private ArrayList<Dosen>             cacheAllDosen;
-    private HashMap<String, Dosen>        indexDosen;       // key: id
-    private ArrayList<MataKuliah>        cacheAllMataKuliah;
-    private HashMap<String, MataKuliah>  indexMataKuliah;  // key: code
-
-    // ----------------------------------------------------------------
-    // Constructor
-    // ----------------------------------------------------------------
     public KampusService() {
         this.mahasiswaMapper  = new MahasiswaMapper();
         this.dosenMapper      = new DosenMapper();
         this.mataKuliahMapper = new MataKuliahMapper();
         this.enrollmentMapper = new EnrollmentMapper();
-
-        // Inisialisasi cache kosong
-        this.cacheAllMahasiswa  = new ArrayList<>();
-        this.indexMahasiswa     = new HashMap<>();
-        this.cacheAllDosen      = new ArrayList<>();
-        this.indexDosen         = new HashMap<>();
-        this.cacheAllMataKuliah = new ArrayList<>();
-        this.indexMataKuliah    = new HashMap<>();
     }
 
     // ================================================================
-    //  MAHASISWA
+    // MAHASISWA
     // ================================================================
 
-    /** Tambah mahasiswa baru ke DB */
+    public ArrayList<Mahasiswa> getAllMahasiswa() {
+        return new ArrayList<>(mahasiswaMapper.findAll());
+    }
+
     public void tambahMahasiswa(String id, String nama, String email, String jurusan) {
         Mahasiswa mhs = new Mahasiswa(id, nama, email, jurusan);
         mahasiswaMapper.save(mhs);
-        // Update cache
-        cacheAllMahasiswa.add(mhs);
-        indexMahasiswa.put(id, mhs);
     }
 
-    /** Ambil semua mahasiswa dari DB, simpan ke cache ArrayList */
-    public ArrayList<Mahasiswa> getAllMahasiswa() {
-        List<Mahasiswa> list = mahasiswaMapper.findAll();
-        cacheAllMahasiswa = new ArrayList<>(list);
-        indexMahasiswa.clear();
-        for (Mahasiswa m : cacheAllMahasiswa) {
-            indexMahasiswa.put(m.getId(), m);
+    public Mahasiswa cariMahasiswaById(String id) {
+        return mahasiswaMapper.findById(id);
+    }
+
+    // Urutkan mahasiswa by nama A-Z → TreeSet
+    public TreeSet<String> getMahasiswaUrutNama() {
+        TreeSet<String> sorted = new TreeSet<>();
+        for (Mahasiswa m : mahasiswaMapper.findAll()) {
+            sorted.add(m.getName() + " (" + m.getId() + ")");
         }
-        return cacheAllMahasiswa;
+        return sorted;
     }
 
-    /** Cari mahasiswa by ID – cek cache HashMap dulu, baru ke DB */
-    public Mahasiswa getMahasiswaById(String id) {
-        if (indexMahasiswa.containsKey(id)) {
-            return indexMahasiswa.get(id);
-        }
-        Mahasiswa mhs = mahasiswaMapper.findById(id);
-        if (mhs != null) indexMahasiswa.put(id, mhs);
-        return mhs;
-    }
-
-    /** Update data mahasiswa */
-    public void updateMahasiswa(String id, String namaBaru, String emailBaru, String jurusanBaru) {
-        Mahasiswa mhs = new Mahasiswa(id, namaBaru, emailBaru, jurusanBaru);
-        mahasiswaMapper.update(mhs);
-        // Refresh cache
-        indexMahasiswa.put(id, mhs);
-        for (int i = 0; i < cacheAllMahasiswa.size(); i++) {
-            if (cacheAllMahasiswa.get(i).getId().equals(id)) {
-                cacheAllMahasiswa.set(i, mhs);
-                break;
+    // Kelompokkan mahasiswa by jurusan → HashMap
+    public HashMap<String, ArrayList<Mahasiswa>> getMahasiswaPerJurusan() {
+        HashMap<String, ArrayList<Mahasiswa>> map = new HashMap<>();
+        for (Mahasiswa m : mahasiswaMapper.findAll()) {
+            String jurusan = m.getMajor();
+            if (!map.containsKey(jurusan)) {
+                map.put(jurusan, new ArrayList<>());
             }
+            map.get(jurusan).add(m);
         }
-    }
-
-    /** Hapus mahasiswa */
-    public void hapusMahasiswa(String id) {
-        mahasiswaMapper.delete(id);
-        indexMahasiswa.remove(id);
-        cacheAllMahasiswa.removeIf(m -> m.getId().equals(id));
+        return map;
     }
 
     // ================================================================
-    //  DOSEN
+    // DOSEN
     // ================================================================
-
-    public void tambahDosen(String id, String nama, String email, String departemen) {
-        Dosen dosen = new Dosen(id, nama, email, departemen);
-        dosenMapper.save(dosen);
-        cacheAllDosen.add(dosen);
-        indexDosen.put(id, dosen);
-    }
 
     public ArrayList<Dosen> getAllDosen() {
-        List<Dosen> list = dosenMapper.findAll();
-        cacheAllDosen = new ArrayList<>(list);
-        indexDosen.clear();
-        for (Dosen d : cacheAllDosen) {
-            indexDosen.put(d.getId(), d);
-        }
-        return cacheAllDosen;
+        return new ArrayList<>(dosenMapper.findAll());
     }
 
-    public Dosen getDosenById(String id) {
-        if (indexDosen.containsKey(id)) return indexDosen.get(id);
-        Dosen dosen = dosenMapper.findById(id);
-        if (dosen != null) indexDosen.put(id, dosen);
-        return dosen;
+    public void tambahDosen(String id, String nama, String email, String dept) {
+        Dosen dosen = new Dosen(id, nama, email, dept);
+        dosenMapper.save(dosen);
     }
 
-    public void updateDosen(String id, String namaBaru, String emailBaru, String depBaru) {
-        Dosen dosen = new Dosen(id, namaBaru, emailBaru, depBaru);
-        dosenMapper.update(dosen);
-        indexDosen.put(id, dosen);
-        for (int i = 0; i < cacheAllDosen.size(); i++) {
-            if (cacheAllDosen.get(i).getId().equals(id)) {
-                cacheAllDosen.set(i, dosen);
-                break;
+    // Kelompokkan dosen by departemen → HashMap
+    public HashMap<String, ArrayList<Dosen>> getDosenPerDepartemen() {
+        HashMap<String, ArrayList<Dosen>> map = new HashMap<>();
+        for (Dosen d : dosenMapper.findAll()) {
+            String dept = d.getDepartment();
+            if (!map.containsKey(dept)) {
+                map.put(dept, new ArrayList<>());
             }
+            map.get(dept).add(d);
         }
-    }
-
-    public void hapusDosen(String id) {
-        dosenMapper.delete(id);
-        indexDosen.remove(id);
-        cacheAllDosen.removeIf(d -> d.getId().equals(id));
+        return map;
     }
 
     // ================================================================
-    //  MATA KULIAH
+    // MATA KULIAH
     // ================================================================
+
+    public ArrayList<MataKuliah> getAllMataKuliah() {
+        return new ArrayList<>(mataKuliahMapper.findAll());
+    }
 
     public void tambahMataKuliah(String kode, String nama, int sks, String dosenId) {
         MataKuliah mk = new MataKuliah(kode, nama, sks, dosenId);
         mataKuliahMapper.save(mk);
-        cacheAllMataKuliah.add(mk);
-        indexMataKuliah.put(kode, mk);
-    }
-
-    public ArrayList<MataKuliah> getAllMataKuliah() {
-        List<MataKuliah> list = mataKuliahMapper.findAll();
-        cacheAllMataKuliah = new ArrayList<>(list);
-        indexMataKuliah.clear();
-        for (MataKuliah mk : cacheAllMataKuliah) {
-            indexMataKuliah.put(mk.getCode(), mk);
-        }
-        return cacheAllMataKuliah;
-    }
-
-    public MataKuliah getMataKuliahByKode(String kode) {
-        if (indexMataKuliah.containsKey(kode)) return indexMataKuliah.get(kode);
-        MataKuliah mk = mataKuliahMapper.findById(kode);
-        if (mk != null) indexMataKuliah.put(kode, mk);
-        return mk;
-    }
-
-    public void updateMataKuliah(String kode, String namaBaru, int sksBaru, String dosenIdBaru) {
-        MataKuliah mk = new MataKuliah(kode, namaBaru, sksBaru, dosenIdBaru);
-        mataKuliahMapper.update(mk);
-        indexMataKuliah.put(kode, mk);
-        for (int i = 0; i < cacheAllMataKuliah.size(); i++) {
-            if (cacheAllMataKuliah.get(i).getCode().equals(kode)) {
-                cacheAllMataKuliah.set(i, mk);
-                break;
-            }
-        }
-    }
-
-    public void hapusMataKuliah(String kode) {
-        mataKuliahMapper.delete(kode);
-        indexMataKuliah.remove(kode);
-        cacheAllMataKuliah.removeIf(mk -> mk.getCode().equals(kode));
     }
 
     // ================================================================
-    //  ENROLLMENT
+    // ENROLLMENT & NILAI
     // ================================================================
 
-    /** Daftarkan mahasiswa ke mata kuliah */
-    public void enrollMahasiswa(String studentId, String courseCode, String semester) {
-        // Validasi: pastikan mahasiswa & mk ada
-        Mahasiswa mhs = getMahasiswaById(studentId);
-        MataKuliah mk = getMataKuliahByKode(courseCode);
-        if (mhs == null) {
-            System.out.println("[Service] Mahasiswa ID tidak ditemukan: " + studentId);
-            return;
-        }
-        if (mk == null) {
-            System.out.println("[Service] Kode MK tidak ditemukan: " + courseCode);
-            return;
-        }
-        Enrollment enr = new Enrollment(studentId, courseCode, 0.0, semester);
+    public void daftarkanMahasiswa(String mhsId, String kode, String semester) {
+        Enrollment enr = new Enrollment(mhsId, kode, 0.0, semester);
         enrollmentMapper.save(enr);
     }
 
-    /** Input/update nilai mahasiswa */
-    public void inputNilai(String studentId, String courseCode, String semester, double nilai) {
-        Enrollment enr = new Enrollment(studentId, courseCode, nilai, semester);
-        enrollmentMapper.update(enr);
+    public ArrayList<Enrollment> getNilaiMahasiswa(String mhsId) {
+        return new ArrayList<>(enrollmentMapper.findByStudentId(mhsId));
     }
 
-    /** Lihat semua enrollment mahasiswa tertentu */
-    public ArrayList<Enrollment> getEnrollmentMahasiswa(String studentId) {
-        List<Enrollment> list = enrollmentMapper.findByStudentId(studentId);
-        return new ArrayList<>(list);
+    public double getRataRataNilai(String mhsId) {
+        ArrayList<Enrollment> list = getNilaiMahasiswa(mhsId);
+        if (list.isEmpty()) return 0.0;
+        double total = 0;
+        for (Enrollment e : list) total += e.getGrade();
+        return total / list.size();
     }
 
-    /** Hitung IPK mahasiswa berdasarkan nilai enrollment */
-    public double hitungIPK(String studentId) {
-        ArrayList<Enrollment> enrollments = getEnrollmentMahasiswa(studentId);
-        if (enrollments.isEmpty()) return 0.0;
-
-        double totalBobot = 0.0;
-        int    totalSKS   = 0;
-
-        for (Enrollment enr : enrollments) {
-            MataKuliah mk = getMataKuliahByKode(enr.getCourseCode());
-            int sks = (mk != null) ? mk.getCredits() : 2; // default 2 SKS
-            double nilaiHuruf = konversiNilai(enr.getGrade());
-            totalBobot += nilaiHuruf * sks;
-            totalSKS   += sks;
+    // Ranking mahasiswa by rata-rata nilai → LinkedHashMap
+    public LinkedHashMap<String, Double> getRankingMahasiswa() {
+        ArrayList<Mahasiswa> semua = getAllMahasiswa();
+        HashMap<String, Double> rataMap = new HashMap<>();
+        for (Mahasiswa m : semua) {
+            rataMap.put(m.getName(), getRataRataNilai(m.getId()));
         }
-        return (totalSKS == 0) ? 0.0 : totalBobot / totalSKS;
-    }
-
-    /** Konversi nilai angka (0–100) ke bobot (0–4) */
-    public double konversiNilai(double nilai) {
-        if (nilai >= 85) return 4.0;
-        if (nilai >= 75) return 3.0;
-        if (nilai >= 65) return 2.0;
-        if (nilai >= 55) return 1.0;
-        return 0.0;
-    }
-
-    /** Konversi bobot ke huruf */
-    public String bobotKeHuruf(double bobot) {
-        if (bobot == 4.0) return "A";
-        if (bobot == 3.0) return "B";
-        if (bobot == 2.0) return "C";
-        if (bobot == 1.0) return "D";
-        return "E";
-    }
-
-    /** Hapus enrollment */
-    public void hapusEnrollment(String studentId, String courseCode, String semester) {
-        enrollmentMapper.deleteByKey(studentId, courseCode, semester);
-    }
-
-    /** Lihat semua enrollment */
-    public ArrayList<Enrollment> getAllEnrollment() {
-        return new ArrayList<>(enrollmentMapper.findAll());
+        LinkedHashMap<String, Double> ranking = new LinkedHashMap<>();
+        rataMap.entrySet()
+               .stream()
+               .sorted(Map.Entry.<String, Double>comparingByValue().reversed())
+               .forEach(e -> ranking.put(e.getKey(), e.getValue()));
+        return ranking;
     }
 }
