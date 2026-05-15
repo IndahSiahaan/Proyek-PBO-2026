@@ -1,12 +1,5 @@
 package model;
 
-/**
- * Enrollment - Model class
- * Anggota 2: Kelvin Marpaung
- *
- * Representasi tabel enrollments di database.
- * Menyimpan data mahasiswa yang mengambil mata kuliah beserta nilainya.
- */
 public class Enrollment {
 
     private String studentId;
@@ -14,7 +7,6 @@ public class Enrollment {
     private double grade;
     private String semester;
 
-    // Constructor
     public Enrollment(String studentId, String courseCode, double grade, String semester) {
         this.studentId  = studentId;
         this.courseCode = courseCode;
@@ -22,7 +14,6 @@ public class Enrollment {
         this.semester   = semester;
     }
 
-    // Getter & Setter
     public String getStudentId()           { return studentId; }
     public String getCourseCode()          { return courseCode; }
     public double getGrade()               { return grade; }

@@ -7,10 +7,6 @@ import model.Enrollment;
 
 import java.util.*;
 
-/**
- * Main.java - Entry Point CLI
- * Anggota 4: Menu interaktif Sistem Manajemen Kampus
- */
 public class Main {
 
     static Scanner scanner = new Scanner(System.in);

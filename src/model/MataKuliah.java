@@ -1,11 +1,5 @@
 package model;
 
-/**
- * MataKuliah - Model class
- * Anggota 2: Kelvin Marpaung
- *
- * Representasi tabel courses di database.
- */
 public class MataKuliah {
 
     private String code;
@@ -13,7 +7,6 @@ public class MataKuliah {
     private int    credits;
     private String lecturerId;
 
-    // Constructor
     public MataKuliah(String code, String name, int credits, String lecturerId) {
         this.code       = code;
         this.name       = name;
@@ -21,7 +14,6 @@ public class MataKuliah {
         this.lecturerId = lecturerId;
     }
 
-    // Getter & Setter
     public String getCode()              { return code; }
     public String getName()              { return name; }
     public int    getCredits()           { return credits; }

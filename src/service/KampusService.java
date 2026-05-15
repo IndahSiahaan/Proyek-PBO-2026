@@ -11,11 +11,6 @@ import model.Enrollment;
 
 import java.util.*;
 
-/**
- * KampusService - Service Layer
- * Dea Hutapea (12S24053): Business logic menggunakan Java Collection Framework (JCF)
- * Menggunakan: ArrayList, HashMap, TreeSet, LinkedHashMap
- */
 public class KampusService {
 
     private MahasiswaMapper mahasiswaMapper;
@@ -30,10 +25,6 @@ public class KampusService {
         this.enrollmentMapper = new EnrollmentMapper();
     }
 
-    // ================================================================
-    // MAHASISWA
-    // ================================================================
-
     public ArrayList<Mahasiswa> getAllMahasiswa() {
         return new ArrayList<>(mahasiswaMapper.findAll());
     }
@@ -47,7 +38,6 @@ public class KampusService {
         return mahasiswaMapper.findById(id);
     }
 
-    // Urutkan mahasiswa by nama A-Z → TreeSet
     public TreeSet<String> getMahasiswaUrutNama() {
         TreeSet<String> sorted = new TreeSet<>();
         for (Mahasiswa m : mahasiswaMapper.findAll()) {
@@ -56,7 +46,6 @@ public class KampusService {
         return sorted;
     }
 
-    // Kelompokkan mahasiswa by jurusan → HashMap
     public HashMap<String, ArrayList<Mahasiswa>> getMahasiswaPerJurusan() {
         HashMap<String, ArrayList<Mahasiswa>> map = new HashMap<>();
         for (Mahasiswa m : mahasiswaMapper.findAll()) {
@@ -69,10 +58,6 @@ public class KampusService {
         return map;
     }
 
-    // ================================================================
-    // DOSEN
-    // ================================================================
-
     public ArrayList<Dosen> getAllDosen() {
         return new ArrayList<>(dosenMapper.findAll());
     }
@@ -82,7 +67,6 @@ public class KampusService {
         dosenMapper.save(dosen);
     }
 
-    // Kelompokkan dosen by departemen → HashMap
     public HashMap<String, ArrayList<Dosen>> getDosenPerDepartemen() {
         HashMap<String, ArrayList<Dosen>> map = new HashMap<>();
         for (Dosen d : dosenMapper.findAll()) {
@@ -95,10 +79,6 @@ public class KampusService {
         return map;
     }
 
-    // ================================================================
-    // MATA KULIAH
-    // ================================================================
-
     public ArrayList<MataKuliah> getAllMataKuliah() {
         return new ArrayList<>(mataKuliahMapper.findAll());
     }
@@ -107,10 +87,6 @@ public class KampusService {
         MataKuliah mk = new MataKuliah(kode, nama, sks, dosenId);
         mataKuliahMapper.save(mk);
     }
-
-    // ================================================================
-    // ENROLLMENT & NILAI
-    // ================================================================
 
     public void daftarkanMahasiswa(String mhsId, String kode, String semester) {
         Enrollment enr = new Enrollment(mhsId, kode, 0.0, semester);
@@ -129,7 +105,6 @@ public class KampusService {
         return total / list.size();
     }
 
-    // Ranking mahasiswa by rata-rata nilai → LinkedHashMap
     public LinkedHashMap<String, Double> getRankingMahasiswa() {
         ArrayList<Mahasiswa> semua = getAllMahasiswa();
         HashMap<String, Double> rataMap = new HashMap<>();
